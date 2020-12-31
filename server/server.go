@@ -10,7 +10,7 @@ import (
 )
 
 type brokerServer struct {
-	lab3.UnimplementedDNSServer
+	lab3.UnimplementedBrokerServer
 }
 
 func main() {
@@ -21,9 +21,9 @@ func main() {
 		log.Fatalf("failed to listen: %v", err)
 	}
 	// create a server instance
-	bs := brokerServer{}                               // create a gRPC server object
-	grpcBrokerServer := grpc.NewServer()               // attach the Ping service to the server
-	lab3.RegisterDNSServer(grpcBrokerServer, &bs) // start the server
+	bs := brokerServer{}                             // create a gRPC server object
+	grpcBrokerServer := grpc.NewServer()             // attach the Ping service to the server
+	lab3.RegisterBrokerServer(grpcBrokerServer, &bs) // start the server
 
 	log.Println("BrokerServer running ...")
 	if err := grpcBrokerServer.Serve(lis); err != nil {
@@ -33,11 +33,29 @@ func main() {
 
 //DNSIsAvailable server side
 func (b *brokerServer) DNSIsAvailable(ctx context.Context, msg *lab3.Message) (*lab3.DNSState, error) {
+	dnsIps := []string{"10.10.28,17:8000", "10.10.28,18:8000", "10.10.28,19:8000"}
+	state := lab3.DNSState{Dns1: true, Dns2: true, Dns3: true}
+	for i, val := range dnsIps {
+		// connection to each dns server, if fail server not available
+		_, err := grpc.Dial(val, grpc.WithInsecure())
+		if err != nil {
+			switch i {
+			case 1:
+				state.Dns1 = false
 
-	return &lab3.DNSState{Dns1:true, Dns2:true, Dns3:true}, nil
+			case 2:
+				state.Dns2 = false
+
+			case 3:
+				state.Dns3 = false
+			}
+		}
+	}
+	return &state, nil
 }
 
 //GetIP server side
 func (b *brokerServer) GetIP(ctx context.Context, cmd *lab3.Command) (*lab3.PageInfo, error) {
-	return &lab3.PageInfo{Ip:"10.10.10.0"}, nil
+
+	return &lab3.PageInfo{Ip: "10.10.10.0"}, nil
 }
