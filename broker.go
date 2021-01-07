@@ -58,7 +58,7 @@ func (b *brokerServer) DNSIsAvailable(ctx context.Context, msg *lab3.Message) (*
 func (b *brokerServer) GetIP(ctx context.Context, cmd *lab3.Command) (*lab3.PageInfo, error) {
 	var pageInfo lab3.PageInfo
 	//Call to GetPageInfo in DNSServer as a DNS client
-	dnsIps := []string{"10.10.28,17:8000", "10.10.28,18:8000", "10.10.28,19:8000"}
+	dnsIps := []string{"10.10.28.17:8000", "10.10.28.18:8000", "10.10.28.19:8000"}
 	for _, val := range dnsIps {
 		conn1, err1 := grpc.Dial(val, grpc.WithInsecure())
 		if err1 != nil {
