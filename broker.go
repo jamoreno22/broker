@@ -33,7 +33,7 @@ func main() {
 
 //DNSIsAvailable server side
 func (b *brokerServer) DNSIsAvailable(ctx context.Context, msg *lab3.Message) (*lab3.DNSState, error) {
-	dnsIps := []string{"10.10.28,17:8000", "10.10.28,18:8000", "10.10.28,19:8000"}
+	dnsIps := []string{"10.10.28.17:8000", "10.10.28.18:8000", "10.10.28.19:8000"}
 	state := lab3.DNSState{Dns1: true, Dns2: true, Dns3: true}
 	for i, val := range dnsIps {
 		// connection to each dns server, if fail server not available
@@ -56,7 +56,7 @@ func (b *brokerServer) DNSIsAvailable(ctx context.Context, msg *lab3.Message) (*
 
 //GetIP server side
 func (b *brokerServer) GetIP(ctx context.Context, cmd *lab3.Command) (*lab3.PageInfo, error) {
-	var pageInfo *lab3.PageInfo
+	var pageInfo lab3.PageInfo
 	//Call to GetPageInfo in DNSServer as a DNS client
 	dnsIps := []string{"10.10.28.17:8000", "10.10.28.18:8000", "10.10.28.19:8000"}
 	for _, val := range dnsIps {
@@ -65,8 +65,8 @@ func (b *brokerServer) GetIP(ctx context.Context, cmd *lab3.Command) (*lab3.Page
 			continue
 		}
 		dnsc := lab3.NewDNSClient(conn1)
-		pageInfo, _ = dnsc.GetIP(ctx, cmd)
+		pageInfo, _ = &dnsc.GetIP(ctx, cmd)
 		break
 	}
-	return pageInfo, nil
+	return &pageInfo, nil
 }
